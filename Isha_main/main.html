@@ -4,7 +4,384 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ISHA Assistant</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root {
+      --bg1: #050519;
+      --bg2: #0f1636;
+      --neon1: #00e0ff;
+      --neon2: #7b4bff;
+      --glass: rgba(255, 255, 255, 0.04);
+      --glass-strong: rgba(255, 255, 255, 0.07);
+      --accent-shadow: 0 10px 30px rgba(0, 224, 255, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+      font-family: "Segoe UI", Inter, system-ui, sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(0, 224, 255, 0.03), transparent 8%),
+                  radial-gradient(1000px 400px at 90% 90%, rgba(123, 75, 255, 0.03), transparent 8%),
+                  linear-gradient(180deg, var(--bg1), var(--bg2));
+      color: #e8f6ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .container {
+      width: 540px;
+      max-width: calc(100% - 40px);
+      height: 680px;
+      border-radius: 24px;
+      position: relative;
+      padding: 30px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      box-shadow: 0 20px 60px rgba(5, 10, 40, 0.6), 0 6px 18px rgba(0, 224, 255, 0.02);
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+    }
+
+    .container::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: 26px;
+      background: conic-gradient(from 0deg, rgba(0, 224, 255, 0.12), rgba(123, 75, 255, 0.08), rgba(0, 224, 255, 0.12));
+      filter: blur(30px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .topbar {
+      z-index: 5;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .title {
+      font-weight: 700;
+      font-size: 18px;
+      color: #cfeeff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--neon1), var(--neon2));
+      box-shadow: 0 0 18px rgba(0, 224, 255, 0.4), 0 0 40px rgba(123, 75, 255, 0.14);
+    }
+
+    .version {
+      opacity: 0.8;
+      font-size: 13px;
+      color: #bfefff;
+    }
+
+    .stage {
+      position: relative;
+      z-index: 3;
+      width: 100%;
+      height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas#particles {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .core {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 4;
+      transform-style: preserve-3d;
+      animation: bob 4s ease-in-out infinite;
+    }
+
+    @keyframes bob {
+      0% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-10px) scale(1.02); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    .core .aura {
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(0, 224, 255, 0.08), transparent 30%),
+                  radial-gradient(circle at 70% 70%, rgba(123, 75, 255, 0.06), transparent 30%);
+      filter: blur(12px);
+      z-index: 2;
+      width: calc(100% + 24px);
+      height: calc(100% + 24px);
+      pointer-events: none;
+    }
+
+    .core .ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      z-index: 3;
+    }
+
+    .ring .spin {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      border-top-color: rgba(0, 224, 255, 0.6);
+      border-right-color: rgba(123, 75, 255, 0.35);
+      transform-origin: center;
+      animation: spinSlow 10s linear infinite;
+      filter: drop-shadow(0 0 18px rgba(0, 224, 255, 0.08));
+    }
+
+    .ring .spin.two {
+      border-top-color: rgba(123, 75, 255, 0.6);
+      border-left-color: rgba(0, 224, 255, 0.18);
+      animation-direction: reverse;
+      animation-duration: 14s;
+      transform: scale(0.86);
+    }
+
+    @keyframes spinSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .core .sphere {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 30%, rgba(255, 255, 255, 0.14), rgba(0, 224, 255, 0.07)),
+                  linear-gradient(180deg, rgba(8, 18, 40, 0.8), rgba(2, 6, 20, 0.9));
+      box-shadow: inset 0 6px 18px rgba(255, 255, 255, 0.02), 0 20px 50px rgba(0, 224, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      transform: translateZ(20px);
+      overflow: visible;
+    }
+
+    .sphere::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      box-shadow: 0 0 28px rgba(0, 224, 255, 0.14), 0 0 64px rgba(123, 75, 255, 0.06);
+      pointer-events: none;
+    }
+
+    .label {
+      font-weight: 800;
+      font-size: 28px;
+      letter-spacing: 2px;
+      color: #e9fbff;
+      text-shadow: 0 0 12px rgba(0, 224, 255, 0.5), 0 0 30px rgba(123, 75, 255, 0.12);
+      z-index: 6;
+      transform: translateZ(30px);
+    }
+
+    .halo {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      z-index: 4;
+      pointer-events: none;
+      background: conic-gradient(from 180deg at 50% 50%, rgba(0, 224, 255, 0.06), rgba(123, 75, 255, 0.04), transparent 40%);
+      filter: blur(6px);
+      animation: haloRotate 8s linear infinite;
+    }
+
+    @keyframes haloRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .datetime {
+      margin-top: 18px;
+      z-index: 6;
+      text-align: center;
+      color: var(--neon1);
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 1px;
+      text-shadow: 0 0 10px rgba(0, 224, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .datetime .time {
+      font-family: "Orbitron", "Segoe UI", sans-serif;
+      font-size: 28px;
+      color: #dffbff;
+      text-shadow: 0 0 18px rgba(0, 224, 255, 0.35);
+    }
+
+    .datetime .date {
+      font-size: 13px;
+      color: #b9e9ff;
+      opacity: 0.9;
+    }
+
+    .controls {
+      z-index: 6;
+      margin-top: auto;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .input {
+      flex: 1;
+      height: 48px;
+      border-radius: 14px;
+      padding: 10px 16px;
+      background: var(--glass);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      color: #e8f6ff;
+      outline: none;
+      font-size: 15px;
+      box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.35);
+    }
+
+    .controls .right {
+      display: flex;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(180deg, #0c1228, #05051a);
+      color: var(--neon1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(0, 224, 255, 0.06);
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+
+    .icon-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 36px rgba(0, 224, 255, 0.08);
+    }
+
+    .popup {
+      position: absolute;
+      width: 320px;
+      min-height: 120px;
+      border-radius: 12px;
+      padding: 14px;
+      background: linear-gradient(180deg, rgba(10, 12, 22, 0.98), rgba(12, 14, 30, 0.96));
+      border: 1px solid rgba(0, 224, 255, 0.06);
+      box-shadow: 0 30px 60px rgba(3, 8, 30, 0.7), 0 6px 18px rgba(0, 224, 255, 0.04);
+      display: none;
+      z-index: 20;
+      transition: all 0.4s ease;
+    }
+
+    #appPopup { left: -340px; top: 120px; }
+    #settingsPopup { right: -340px; top: 140px; }
+
+    #appPopup.active { left: 40px; animation: slideFromLeft 0.4s ease; }
+    #settingsPopup.active { right: 40px; animation: slideFromRight 0.4s ease; }
+
+    @keyframes slideFromLeft {
+      from { transform: translateX(-40px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideFromRight {
+      from { transform: translateX(40px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .popup .head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      color: var(--neon1);
+      font-weight: 700;
+    }
+
+    .popup .close {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, 0.02);
+      cursor: pointer;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .popup .close:hover {
+      color: var(--neon1);
+      transform: scale(1.08);
+    }
+
+    .popup-content {
+      font-size: 14px;
+      color: #cfeeff;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        width: 94%;
+        height: 86vh;
+        padding: 18px;
+      }
+      .core {
+        width: 180px;
+        height: 180px;
+      }
+      .sphere {
+        width: 100px;
+        height: 100px;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -52,8 +429,9 @@
     </div>
     <div class="popup-content">
       <p style="text-align:center; opacity:0.7;">No applications configured yet.</p>
-      <!-- Yahan apps add kar sakte ho, jaise:
-      <div class="app-item" data-command="open calculator">🧮 Calculator</div>
+      <!-- Example app item (uncomment to use):
+      <div style="padding:8px 12px; cursor:pointer; border-radius:8px; margin:4px 0;" 
+           onclick="alert('Calculator opened!')">🧮 Calculator</div>
       -->
     </div>
   </div>
@@ -69,6 +447,166 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    // Particles Animation
+    (function () {
+      const canvas = document.getElementById('particles');
+      const ctx = canvas.getContext('2d');
+      let w = canvas.width = canvas.clientWidth;
+      let h = canvas.height = canvas.clientHeight;
+      const particles = [];
+      const count = Math.round((w * h) / 7000);
+
+      function rand(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      function resize() {
+        w = canvas.width = canvas.clientWidth;
+        h = canvas.height = canvas.clientHeight;
+        particles.length = 0;
+        for (let i = 0; i < count; i++) {
+          particles.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            r: rand(0.6, 2.4),
+            vx: rand(-0.2, 0.2),
+            vy: rand(-0.05, 0.05),
+            hue: Math.random() > 0.6 ? 200 + Math.random() * 50 : 260 + Math.random() * 30,
+            alpha: rand(0.06, 0.25)
+          });
+        }
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+        const g = ctx.createRadialGradient(w * 0.5, h * 0.35, 10, w * 0.5, h * 0.35, Math.max(w, h));
+        g.addColorStop(0, 'rgba(0,0,0,0)');
+        g.addColorStop(1, 'rgba(0,0,0,0.25)');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, w, h);
+
+        for (const p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < -20) p.x = w + 20;
+          if (p.x > w + 20) p.x = -20;
+          if (p.y < -20) p.y = h + 20;
+          if (p.y > h + 20) p.y = -20;
+
+          ctx.beginPath();
+          ctx.fillStyle = `hsla(${p.hue},90%,60%,${p.alpha})`;
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    // Update Date & Time
+    function updateDateTime() {
+      const now = new Date();
+      document.getElementById('time').textContent = now.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+      document.getElementById('date').textContent = now.toLocaleDateString([], {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
+    setInterval(updateDateTime, 500);
+    updateDateTime();
+
+    // Draggable Popups
+    function makeDraggable(el) {
+      let dragging = false, ox = 0, oy = 0;
+      el.addEventListener('mousedown', (e) => {
+        dragging = true;
+        ox = e.clientX - el.offsetLeft;
+        oy = e.clientY - el.offsetTop;
+        el.style.transition = 'none';
+        document.body.style.userSelect = 'none';
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!dragging) return;
+        el.style.left = (e.clientX - ox) + 'px';
+        el.style.top = (e.clientY - oy) + 'px';
+      });
+      window.addEventListener('mouseup', () => {
+        if (dragging) {
+          dragging = false;
+          el.style.transition = '';
+          document.body.style.userSelect = '';
+        }
+      });
+    }
+
+    // Popup Controls
+    const appBtn = document.getElementById('appBtn');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const appPopup = document.getElementById('appPopup');
+    const settingsPopup = document.getElementById('settingsPopup');
+
+    appBtn.addEventListener('click', () => {
+      const isActive = appPopup.classList.toggle('active');
+      if (isActive) {
+        appPopup.style.display = 'block';
+        settingsPopup.classList.remove('active');
+        settingsPopup.style.display = 'none';
+      } else {
+        setTimeout(() => appPopup.style.display = 'none', 400);
+      }
+    });
+
+    settingsBtn.addEventListener('click', () => {
+      const isActive = settingsPopup.classList.toggle('active');
+      if (isActive) {
+        settingsPopup.style.display = 'block';
+        appPopup.classList.remove('active');
+        appPopup.style.display = 'none';
+      } else {
+        setTimeout(() => settingsPopup.style.display = 'none', 400);
+      }
+    });
+
+    document.querySelectorAll('.close').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.close;
+        if (id) {
+          document.getElementById(id).classList.remove('active');
+          setTimeout(() => document.getElementById(id).style.display = 'none', 400);
+        }
+      });
+    });
+
+    makeDraggable(appPopup);
+    makeDraggable(settingsPopup);
+
+    // Command Input (Enter key)
+    document.getElementById('cmd').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const command = e.target.value.trim();
+        if (command) {
+          console.log('Command sent:', command);
+          alert('Command: ' + command + '\n(Backend integration yahan kar sakte ho)');
+          e.target.value = '';
+        }
+      }
+    });
+
+    // Voice Button (demo)
+    document.getElementById('voiceBtn').addEventListener('click', () => {
+      alert('Voice mode activated! 🎤\n(Real voice recognition yahan add kar sakte ho)');
+    });
+  </script>
 </body>
 </html>
