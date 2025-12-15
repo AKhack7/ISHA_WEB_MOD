@@ -1,7 +1,7 @@
 # ISHA_WEB_MOD
 
 # isha
-## https://akhack7.github.io/
+## https://akhack7.github.io/ISHA_WEB_MOD/Isha_main/main.html
 
 
 
