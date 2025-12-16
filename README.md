@@ -10,3 +10,7 @@
 
 # ISHA
 ## https://akhack7.github.io/ISHA_WEB_MOD/isha-assistant/index.html
+
+
+# ISHA-Futuristic-3.o
+## https://akhack7.github.io/ISHA-Futuristic-3.o/index.html
