@@ -8,5 +8,5 @@
 # voice mode
 ## https://akhack7.github.io/ISHA_WEB_MOD/Voice_Speak/Index.html
 
-#ISHA
+# ISHA
 ## https://akhack7.github.io/ISHA_WEB_MOD/isha-assistant/index.html
