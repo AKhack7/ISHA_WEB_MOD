@@ -14,3 +14,6 @@
 
 # ISHA-Futuristic-3.o
 ## https://akhack7.github.io/ISHA-Futuristic-3.o/index.html
+
+# isah ai web mode
+## https://akhack7.github.io/ISHA-Futuristic-3.o/ISHA/main.html
